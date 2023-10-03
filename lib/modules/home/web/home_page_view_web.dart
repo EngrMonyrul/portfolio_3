@@ -1,9 +1,11 @@
-// ignore_for_file: use_build_context_synchronously
-
+import 'dart:ui';
+import 'package:animate_do/animate_do.dart';
+import 'package:animated_text_kit/animated_text_kit.dart';
+import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:video_player/video_player.dart';
-import 'package:chewie/chewie.dart';
+import 'package:portfolio/modules/home/web/widgets/calendar_widget.dart';
+import 'package:portfolio/modules/home/web/widgets/clock_widget.dart';
+import '../../../controllers/constants/constants.dart';
 
 class HomePageWebView extends StatefulWidget {
   const HomePageWebView({super.key});
@@ -13,61 +15,133 @@ class HomePageWebView extends StatefulWidget {
 }
 
 class _HomePageWebViewState extends State<HomePageWebView> {
-  VideoPlayerController? videoPlayerController;
-  ChewieController? chewieController;
-
-  Future<VideoPlayerController> setVideoPlayerController() async {
-    try {
-      videoPlayerController = VideoPlayerController.networkUrl(
-        Uri.parse(
-            'https://player.vimeo.com/external/224889044.sd.mp4?s=592944e98c732eb867d56e9b4940d9ed78bbe0ea&profile_id=164&oauth2_token_id=57447761'),
-      );
-
-      await videoPlayerController!.initialize();
-      await videoPlayerController!.play();
-
-      return videoPlayerController!;
-    } catch (e) {
-      print(e.toString());
-
-      return videoPlayerController!;
-    }
-  }
+  int colorIndex = 0;
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body:
-      FutureBuilder<VideoPlayerController>(
-        future: setVideoPlayerController(),
-        builder: (context, AsyncSnapshot<VideoPlayerController> snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(
-              child: CircularProgressIndicator(),
-            );
-          } else if (snapshot.hasError) {
-            return const Center(
-              child: Text(
-                'Something Went Wrong',
-                style: TextStyle(
-                  color: Colors.black,
-                  fontSize: 30,
+    Size screenSize = MediaQuery.of(context).size;
+    return Container(
+      decoration: const BoxDecoration(
+        image: DecorationImage(
+          image: NetworkImage(bgImg),
+          fit: BoxFit.fill,
+        ),
+      ),
+      child: Center(
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            SizedBox(
+              height: screenSize.height * 0.6,
+              width: screenSize.width * 0.4,
+              child: BackdropFilter(
+                filter: ImageFilter.blur(sigmaY: 5, sigmaX: 5),
+                child: SizedBox(
+                  height: screenSize.height * 0.6,
+                  width: screenSize.width * 0.4,
                 ),
               ),
-            );
-          } else {
-            return Center(
-              child: SizedBox(
-                height: MediaQuery.of(context).size.height,
-                width: MediaQuery.of(context).size.width,
-                child: Transform.scale(
-                  scale: 2.2,
-                  child: VideoPlayer(snapshot.data!),
+            ),
+            FadeIn(
+              child: Container(
+                height: screenSize.height * 0.6,
+                width: screenSize.width * 0.4,
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.7),
+                  borderRadius: const BorderRadius.all(Radius.circular(10)),
+                ),
+                child: Column(
+                  children: [
+                    SlideInUp(
+                      child: SizedBox(
+                        height: screenSize.height * 0.15,
+                        width: screenSize.width * 0.4,
+                        child: Column(
+                          children: [
+                            const Text(
+                              ownerName,
+                              overflow: TextOverflow.ellipsis,
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                fontSize: 50,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                            AnimatedTextKit(
+                              repeatForever: true,
+                              isRepeatingAnimation: true,
+                              onNextBeforePause: (_, __) {
+                                setState(() {
+                                  if (colorIndex == animatedTextColors.length - 1) {
+                                    colorIndex = 0;
+                                  } else {
+                                    colorIndex++;
+                                  }
+                                });
+                              },
+                              animatedTexts: animatedText.map((e) {
+                                return FadeAnimatedText(
+                                  e,
+                                  duration: const Duration(seconds: 5),
+                                  textStyle: TextStyle(
+                                    color: animatedTextColors[colorIndex],
+                                  ),
+                                );
+                              }).toList(),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    Container(
+                      height: screenSize.height * 0.33,
+                      width: screenSize.width * 0.2,
+                      margin: const EdgeInsets.symmetric(vertical: 3),
+                      child: CarouselSlider(
+                        options: CarouselOptions(
+                          viewportFraction: 1,
+                          autoPlay: true,
+                          scrollPhysics: const BouncingScrollPhysics(),
+                          enableInfiniteScroll: true,
+                          animateToClosest: true,
+                          enlargeCenterPage: true,
+                        ),
+                        items: SliderWidgets.map((e){
+                          return e;
+                        }).toList(),
+                      ),
+                    ),
+                    const Spacer(),
+                    FadeIn(
+                      duration: const Duration(seconds: 5),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: pageButtons.map((e) {
+                          return Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                            margin: const EdgeInsets.symmetric(horizontal: 3),
+                            decoration: BoxDecoration(
+                              borderRadius: const BorderRadius.all(Radius.circular(5)),
+                              border: Border.all(color: Colors.black),
+                            ),
+                            child: Text(
+                              e,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                color: Colors.black,
+                              ),
+                            ),
+                          );
+                        }).toList(),
+                      ),
+                    )
+                  ],
                 ),
               ),
-            );
-          }
-        },
+            ),
+          ],
+        ),
       ),
     );
   }

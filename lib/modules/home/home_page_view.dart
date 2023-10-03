@@ -8,9 +8,7 @@ class HomePageView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const Scaffold(
-      body: ResponsiveBuilder(
-        webView: HomePageWebView(),
-      ),
+      body: HomePageWebView(),
     );
   }
 }
