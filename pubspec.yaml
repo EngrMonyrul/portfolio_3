@@ -47,6 +47,8 @@ dependencies:
   intl: ^0.18.1
   analog_clock: ^0.1.1
   responsive_framework: ^1.1.1
+  youtube_player_flutter: ^8.1.2
+  flutter_super_html_viewer: ^0.0.2
 
 dev_dependencies:
   flutter_test:
